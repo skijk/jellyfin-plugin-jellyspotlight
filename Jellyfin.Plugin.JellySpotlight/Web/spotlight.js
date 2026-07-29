@@ -19,7 +19,12 @@
   }
   async function details(ids) {
     if (!ids.length) return [];
-    const result = await api({type:'GET',url:ApiClient.getUrl('Items',{Ids:ids.join(','),Fields:'Overview,PrimaryImageAspectRatio,BackdropImageTags,ImageTags'})});
+    const result = await api({type:'GET',url:ApiClient.getUrl('Items',{
+      UserId:ApiClient.getCurrentUserId(),
+      Ids:ids.join(','),
+      Recursive:true,
+      Fields:'Overview,PrimaryImageAspectRatio,BackdropImageTags,ImageTags'
+    })});
     return pick(result,'items') || [];
   }
   async function load(settings) {
@@ -37,8 +42,23 @@
       rows.sort((a,b) => Number(pick(b,'currentPlays') || 0) - Number(pick(a,'currentPlays') || 0));
     }
     rows = rows.slice(0, settings.ItemCount);
-    const byId = new Map((await details(rows.map(row => pick(row,'id')).filter(Boolean))).map(item => [item.Id || item.id,item]));
-    return rows.map(row => ({row,item:byId.get(pick(row,'id'))})).filter(entry => entry.item);
+    let enriched = [];
+    try {
+      enriched = await details(rows.map(row => pick(row,'id')).filter(Boolean));
+    } catch (error) {
+      console.warn('JellySpotlight could not enrich Jelana items with Jellyfin metadata.',error);
+    }
+    const byId = new Map(enriched.map(item => [item.Id || item.id,item]));
+    return rows.map(row => {
+      const id = pick(row,'id');
+      return {
+        row,
+        item:byId.get(id) || {
+          Id:id,
+          Name:pick(row,'name')
+        }
+      };
+    }).filter(entry => entry.item.Id);
   }
   function imageUrl(item) {
     const id = item.Id || item.id;
