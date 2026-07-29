@@ -92,9 +92,11 @@
         const values=[];
         const plays=row && (pick(row,'currentPlays') ?? pick(row,'plays'));
         const viewers=row && pick(row,'uniqueViewers');
+        const community=pick(item,'communityRating');
         const critic=pick(item,'criticRating');
         if (Number.isFinite(Number(plays))) values.push(`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`);
         if (Number.isFinite(Number(viewers))) values.push(`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`);
+        if (Number.isFinite(Number(community))) values.push(`★ ${Number(community).toFixed(1)}`);
         if (Number.isFinite(Number(critic))) values.push(`🍅 ${Math.round(Number(critic))}%`);
         if (values.length) { const meta=document.createElement('span'); meta.textContent=values.join(' · '); copy.append(meta); }
       }
