@@ -83,6 +83,7 @@
     const title=document.createElement('h2'); title.textContent=rowSettings.Title || "What's hot right now";
     const scope=document.createElement('small'); scope.textContent=rowSettings.Source === 'recent' ? 'Recently added' : 'Server-wide · cached by Jelana';
     heading.append(title,scope); const track=document.createElement('div'); track.className='jellyspotlight-track';
+    isolateShelfGestures(track);
     entries.forEach(({row,item}) => {
       const id=item.Id||item.id; const card=document.createElement('a'); card.className='jellyspotlight-card'; card.href=`#!/details?id=${encodeURIComponent(id)}`;
       const image=document.createElement('img'); image.loading='lazy'; image.alt=''; image.src=imageUrl(item);
@@ -107,6 +108,35 @@
     }
     section.append(heading,track);
     return section;
+  }
+  function isolateShelfGestures(track) {
+    let startX=0;
+    let startY=0;
+    let horizontal=false;
+    track.addEventListener('touchstart', event => {
+      const touch=event.touches[0];
+      startX=touch?.clientX || 0;
+      startY=touch?.clientY || 0;
+      horizontal=false;
+      event.stopPropagation();
+    },{passive:true});
+    track.addEventListener('touchmove', event => {
+      const touch=event.touches[0];
+      if (touch && !horizontal) {
+        const deltaX=Math.abs(touch.clientX-startX);
+        const deltaY=Math.abs(touch.clientY-startY);
+        horizontal=deltaX > deltaY && deltaX > 4;
+      }
+      if (horizontal) event.stopPropagation();
+    },{passive:true});
+    track.addEventListener('touchend', event => {
+      if (horizontal) event.stopPropagation();
+      horizontal=false;
+    },{passive:true});
+    track.addEventListener('touchcancel', event => {
+      if (horizontal) event.stopPropagation();
+      horizontal=false;
+    },{passive:true});
   }
   function render(settings, rowResults) {
     const host = homeHost(); if (!host) return;
