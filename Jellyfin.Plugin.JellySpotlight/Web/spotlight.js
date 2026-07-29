@@ -107,11 +107,20 @@
         const viewers=row && pick(row,'uniqueViewers');
         const community=pick(item,'communityRating');
         const critic=pick(item,'criticRating');
-        if (Number.isFinite(Number(plays))) values.push(`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`);
-        if (Number.isFinite(Number(viewers))) values.push(`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`);
-        if (Number.isFinite(Number(community))) values.push(`★ ${Number(community).toFixed(1)}`);
-        if (Number.isFinite(Number(critic))) values.push(`🍅 ${Math.round(Number(critic))}%`);
-        if (values.length) { const meta=document.createElement('span'); meta.textContent=values.join(' · '); copy.append(meta); }
+        if (Number.isFinite(Number(plays))) values.push({text:`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`,className:'jellyspotlight-activity'});
+        if (Number.isFinite(Number(viewers))) values.push({text:`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`,className:'jellyspotlight-activity'});
+        if (Number.isFinite(Number(community))) values.push({text:`★ ${Number(community).toFixed(1)}`,className:'jellyspotlight-rating'});
+        if (Number.isFinite(Number(critic))) values.push({text:`🍅 ${Math.round(Number(critic))}%`,className:'jellyspotlight-critic'});
+        if (values.length) {
+          const meta=document.createElement('span'); meta.className='jellyspotlight-meta';
+          values.forEach((value,index) => {
+            if (index) meta.append(document.createTextNode(' · '));
+            const part=document.createElement('span'); part.textContent=value.text;
+            if (value.className) part.className=value.className;
+            meta.append(part);
+          });
+          copy.append(meta);
+        }
       }
       card.append(image,copy); track.append(card);
     });
