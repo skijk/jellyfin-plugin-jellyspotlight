@@ -98,6 +98,8 @@
     catch (error) { console.warn('JellySpotlight could not load its content.',error); }
     finally { busy=false; }
   }
-  new MutationObserver(() => refresh()).observe(document.body,{childList:true,subtree:true});
+  new MutationObserver(() => {
+    if (!document.getElementById(ROOT_ID)) refresh();
+  }).observe(document.body,{childList:true,subtree:true});
   window.addEventListener('hashchange',refresh); setInterval(refresh,60000); refresh();
 })();
