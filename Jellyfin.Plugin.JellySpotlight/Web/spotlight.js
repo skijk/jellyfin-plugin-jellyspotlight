@@ -3,7 +3,7 @@
   const ROOT_ID = 'jellySpotlight';
   let busy = false;
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
-  const api = options => ApiClient.ajax(options);
+  const api = options => ApiClient.ajax({...options,dataType:'json'});
   function normalizeSettings(raw) {
     return {
       Enabled: pick(raw,'enabled') ?? true,
@@ -82,6 +82,12 @@
       if (settings.ShowMetrics && row) { const meta=document.createElement('span'); const plays=pick(row,'currentPlays') ?? pick(row,'plays'); const viewers=pick(row,'uniqueViewers'); meta.textContent=`${plays} plays${viewers == null ? '' : ` · ${viewers} viewers`}`; copy.append(meta); }
       card.append(image,copy); track.append(card);
     });
+    if (!entries.length) {
+      const empty=document.createElement('p');
+      empty.className='jellyspotlight-error';
+      empty.textContent='No matching titles are available yet.';
+      track.append(empty);
+    }
     root.append(heading,track); host.prepend(root);
   }
   async function refresh() {
