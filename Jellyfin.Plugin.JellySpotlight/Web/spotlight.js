@@ -5,11 +5,20 @@
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
   const api = options => ApiClient.ajax({...options,dataType:'json'});
   function normalizeSettings(raw) {
+    const configuredRows = pick(raw,'rows');
+    const legacyRow = {
+      Enabled:true,
+      Source:pick(raw,'source') || 'hot',
+      Title:pick(raw,'title') || "What's hot right now"
+    };
     return {
       Enabled: pick(raw,'enabled') ?? true,
-      Source: pick(raw,'source') || 'hot',
-      Title: pick(raw,'title') || "What's hot right now",
-      Density: pick(raw,'density') || 'compact',
+      Rows: (configuredRows?.length ? configuredRows : [legacyRow]).map(row => ({
+        Enabled:pick(row,'enabled') ?? true,
+        Source:pick(row,'source') || 'hot',
+        Title:pick(row,'title') || "What's hot right now"
+      })),
+      Density: pick(raw,'density') || 'feature',
       ItemCount: Number(pick(raw,'itemCount') || 8),
       ShowMetrics: pick(raw,'showMetrics') ?? true
     };
@@ -27,15 +36,15 @@
     })});
     return pick(result,'items') || [];
   }
-  async function load(settings) {
-    if (settings.Source === 'recent') {
+  async function load(rowSettings, settings, snapshotPromise) {
+    if (rowSettings.Source === 'recent') {
       const userId = ApiClient.getCurrentUserId();
       const result = await api({type:'GET',url:ApiClient.getUrl('Items',{UserId:userId,SortBy:'DateCreated',SortOrder:'Descending',IncludeItemTypes:'Movie,Series',Recursive:true,Limit:settings.ItemCount,Fields:'BackdropImageTags,ImageTags'})});
       return (pick(result,'items') || []).map(item => ({item}));
     }
-    const snapshot = await api({type:'GET',url:ApiClient.getUrl('Jelana/Snapshot')});
+    const snapshot = await snapshotPromise;
     let rows = pick(snapshot,'trending') || [];
-    if (settings.Source === 'newPopular') {
+    if (rowSettings.Source === 'newPopular') {
       const recent = pick(snapshot,'recent') || [];
       const trendById = new Map(rows.map(row => [pick(row,'id'),row]));
       rows = recent.map(row => trendById.get(pick(row,'id')) || row);
@@ -66,13 +75,11 @@
     return backdrop ? ApiClient.getUrl(`Items/${id}/Images/Backdrop/0`,{maxWidth:720,quality:82})
       : ApiClient.getUrl(`Items/${id}/Images/Primary`,{maxWidth:520,quality:82});
   }
-  function render(settings, entries) {
-    const host = homeHost(); if (!host) return;
-    document.getElementById(ROOT_ID)?.remove();
-    const root = document.createElement('section'); root.id=ROOT_ID; root.className=`jellyspotlight-${settings.Density || 'compact'}`;
+  function renderRow(settings, rowSettings, entries) {
+    const section=document.createElement('section'); section.className='jellyspotlight-row';
     const heading=document.createElement('div'); heading.className='jellyspotlight-heading';
-    const title=document.createElement('h2'); title.textContent=settings.Title || "What's hot right now";
-    const scope=document.createElement('small'); scope.textContent=settings.Source === 'recent' ? 'Recently added' : 'Server-wide · cached by Jelana';
+    const title=document.createElement('h2'); title.textContent=rowSettings.Title || "What's hot right now";
+    const scope=document.createElement('small'); scope.textContent=rowSettings.Source === 'recent' ? 'Recently added' : 'Server-wide · cached by Jelana';
     heading.append(title,scope); const track=document.createElement('div'); track.className='jellyspotlight-track';
     entries.forEach(({row,item}) => {
       const id=item.Id||item.id; const card=document.createElement('a'); card.className='jellyspotlight-card'; card.href=`#!/details?id=${encodeURIComponent(id)}`;
@@ -83,18 +90,29 @@
       card.append(image,copy); track.append(card);
     });
     if (!entries.length) {
-      const empty=document.createElement('p');
-      empty.className='jellyspotlight-error';
-      empty.textContent='No matching titles are available yet.';
-      track.append(empty);
+      const empty=document.createElement('p'); empty.className='jellyspotlight-error'; empty.textContent='No matching titles are available yet.'; track.append(empty);
     }
-    root.append(heading,track); host.prepend(root);
+    section.append(heading,track);
+    return section;
+  }
+  function render(settings, rowResults) {
+    const host = homeHost(); if (!host) return;
+    document.getElementById(ROOT_ID)?.remove();
+    const root = document.createElement('div'); root.id=ROOT_ID; root.className=`jellyspotlight-${settings.Density || 'feature'}`;
+    rowResults.forEach(({row,entries}) => root.append(renderRow(settings,row,entries)));
+    host.prepend(root);
   }
   async function refresh() {
     if (busy || !homeHost()) return; busy=true;
     try { const settings=normalizeSettings(await api({type:'GET',url:ApiClient.getUrl('JellySpotlight/Settings')}));
       if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; }
-      render(settings,await load(settings)); }
+      const rows=settings.Rows.filter(row => row.Enabled);
+      const needsJelana=rows.some(row => row.Source !== 'recent');
+      const snapshotPromise=needsJelana
+        ? api({type:'GET',url:ApiClient.getUrl('Jelana/Snapshot')})
+        : Promise.resolve({});
+      const rowResults=await Promise.all(rows.map(async row => ({row,entries:await load(row,settings,snapshotPromise)})));
+      render(settings,rowResults); }
     catch (error) { console.warn('JellySpotlight could not load its content.',error); }
     finally { busy=false; }
   }

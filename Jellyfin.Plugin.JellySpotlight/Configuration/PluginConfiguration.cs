@@ -2,12 +2,25 @@ using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.JellySpotlight.Configuration;
 
-public sealed class PluginConfiguration : BasePluginConfiguration
+public sealed class SpotlightRowConfiguration
 {
     public bool Enabled { get; set; } = true;
     public string Source { get; set; } = "hot";
     public string Title { get; set; } = "What's hot right now";
-    public string Density { get; set; } = "compact";
+}
+
+public sealed class PluginConfiguration : BasePluginConfiguration
+{
+    public bool Enabled { get; set; } = true;
+    public List<SpotlightRowConfiguration> Rows { get; set; } =
+    [
+        new() { Source = "hot", Title = "What's hot right now" },
+        new() { Source = "newPopular", Title = "New and popular" },
+        new() { Enabled = false, Source = "recent", Title = "Recently added" }
+    ];
+    public string Source { get; set; } = "hot";
+    public string Title { get; set; } = "What's hot right now";
+    public string Density { get; set; } = "feature";
     public int ItemCount { get; set; } = 8;
     public bool ShowMetrics { get; set; } = true;
 }

@@ -3,24 +3,16 @@
   <div data-role="content"><div class="content-primary">
     <form id="JellySpotlightForm">
       <h1>JellySpotlight</h1>
-      <p>A compact, multi-title shelf for the Jellyfin home screen.</p>
+      <p>Responsive feature rows for the Jellyfin home screen. Each enabled row can show several titles and scroll horizontally.</p>
       <div class="checkboxContainer checkboxContainer-withDescription"><label class="emby-checkbox-label">
         <input id="SpotlightEnabled" type="checkbox" is="emby-checkbox"><span>Show JellySpotlight</span>
       </label></div>
-      <div class="selectContainer"><label class="selectLabel" for="SpotlightSource">Content source</label>
-        <select id="SpotlightSource" is="emby-select" class="emby-select-withcolor emby-select">
-          <option value="hot">What's hot right now (Jelana)</option>
-          <option value="recent">Recently added</option>
-          <option value="newPopular">New and popular (Jelana)</option>
-        </select>
-        <div class="fieldDescription">Jelana sources reuse its hourly cached analytics and never query Playback Reporting live.</div>
-      </div>
-      <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="SpotlightTitle">Shelf title</label>
-        <input id="SpotlightTitle" is="emby-input" maxlength="80">
-      </div>
+      <h2>Rows</h2>
+      <div id="SpotlightRows"></div>
+      <div class="fieldDescription">Jelana sources reuse its hourly cached analytics and never query Playback Reporting live.</div>
       <div class="selectContainer"><label class="selectLabel" for="SpotlightDensity">Card size</label>
         <select id="SpotlightDensity" is="emby-select" class="emby-select-withcolor emby-select">
-          <option value="compact">Compact</option><option value="standard">Standard</option>
+          <option value="feature">Feature</option><option value="cinematic">Cinematic</option>
         </select>
       </div>
       <div class="selectContainer"><label class="selectLabel" for="SpotlightCount">Titles to load</label>
@@ -39,13 +31,46 @@
     const id = 'f41f333d-4be5-41df-9b23-d6b5c768ac63';
     const page = document.querySelector('#JellySpotlightConfigPage');
     const form = page.querySelector('#JellySpotlightForm');
+    const defaults = [
+      {Enabled:true,Source:'hot',Title:"What's hot right now"},
+      {Enabled:true,Source:'newPopular',Title:'New and popular'},
+      {Enabled:false,Source:'recent',Title:'Recently added'}
+    ];
+    const sourceOptions = [
+      ['hot',"What's hot right now (Jelana)"],
+      ['newPopular','New and popular (Jelana)'],
+      ['recent','Recently added']
+    ];
+    const renderRows = rows => {
+      const host = page.querySelector('#SpotlightRows');
+      host.replaceChildren(...defaults.map((fallback,index) => {
+        const row = rows[index] || fallback;
+        const box = document.createElement('div');
+        box.className = 'verticalSection';
+        box.style.cssText = 'padding:1rem;margin:0 0 1rem;border:1px solid rgba(255,255,255,.15);border-radius:.5rem';
+        box.innerHTML = `<div class="checkboxContainer"><label class="emby-checkbox-label">
+          <input data-row-enabled="${index}" type="checkbox" is="emby-checkbox"><span>Show row ${index + 1}</span>
+        </label></div>
+        <div class="inputContainer"><label class="inputLabel">Row title</label>
+          <input data-row-title="${index}" is="emby-input" maxlength="80">
+        </div>
+        <div class="selectContainer"><label class="selectLabel">Content source</label>
+          <select data-row-source="${index}" is="emby-select" class="emby-select-withcolor emby-select">
+            ${sourceOptions.map(([value,label]) => `<option value="${value}">${label}</option>`).join('')}
+          </select>
+        </div>`;
+        box.querySelector(`[data-row-enabled="${index}"]`).checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
+        box.querySelector(`[data-row-title="${index}"]`).value = row.Title || row.title || fallback.Title;
+        box.querySelector(`[data-row-source="${index}"]`).value = row.Source || row.source || fallback.Source;
+        return box;
+      }));
+    };
     page.addEventListener('pageshow', async () => {
       Dashboard.showLoadingMsg();
       const c = await ApiClient.getPluginConfiguration(id);
       page.querySelector('#SpotlightEnabled').checked = c.Enabled ?? true;
-      page.querySelector('#SpotlightSource').value = c.Source || 'hot';
-      page.querySelector('#SpotlightTitle').value = c.Title || "What's hot right now";
-      page.querySelector('#SpotlightDensity').value = c.Density || 'compact';
+      renderRows(c.Rows?.length ? c.Rows : [{Enabled:true,Source:c.Source || 'hot',Title:c.Title || "What's hot right now"}]);
+      page.querySelector('#SpotlightDensity').value = c.Density || 'feature';
       page.querySelector('#SpotlightCount').value = String(c.ItemCount || 8);
       page.querySelector('#SpotlightMetrics').checked = c.ShowMetrics ?? true;
       Dashboard.hideLoadingMsg();
@@ -54,8 +79,11 @@
       event.preventDefault(); Dashboard.showLoadingMsg();
       const c = await ApiClient.getPluginConfiguration(id);
       c.Enabled = page.querySelector('#SpotlightEnabled').checked;
-      c.Source = page.querySelector('#SpotlightSource').value;
-      c.Title = page.querySelector('#SpotlightTitle').value.trim() || "What's hot right now";
+      c.Rows = defaults.map((fallback,index) => ({
+        Enabled:page.querySelector(`[data-row-enabled="${index}"]`).checked,
+        Source:page.querySelector(`[data-row-source="${index}"]`).value,
+        Title:page.querySelector(`[data-row-title="${index}"]`).value.trim() || fallback.Title
+      }));
       c.Density = page.querySelector('#SpotlightDensity').value;
       c.ItemCount = Number(page.querySelector('#SpotlightCount').value);
       c.ShowMetrics = page.querySelector('#SpotlightMetrics').checked;
