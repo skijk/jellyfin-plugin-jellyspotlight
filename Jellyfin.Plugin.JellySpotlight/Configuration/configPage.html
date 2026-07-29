@@ -107,14 +107,14 @@
     const renderRows = rows => {
       defaults.forEach((fallback,index) => {
         const row = rows[index] || fallback;
-        page.querySelector(`[data-row-enabled="${index}"]`).checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
+        page.querySelector('[data-row-enabled="' + index + '"]').checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
         const storedTitle = row.Title || row.title || fallback.Title;
-        page.querySelector(`[data-row-title="${index}"]`).value =
+        page.querySelector('[data-row-title="' + index + '"]').value =
           storedTitle === "What's hot right now" ? 'Trending this week'
           : storedTitle === 'New and popular' ? 'Popular new arrivals'
           : storedTitle;
-        const source = page.querySelector(`[data-row-source="${index}"]`);
-        const description = page.querySelector(`[data-row-description="${index}"]`);
+        const source = page.querySelector('[data-row-source="' + index + '"]');
+        const description = page.querySelector('[data-row-description="' + index + '"]');
         source.value = row.Source || row.source || fallback.Source;
         description.textContent = sourceDescriptions[source.value];
       });
@@ -122,7 +122,7 @@
     page.querySelectorAll('[data-row-source]').forEach(source => {
       source.addEventListener('change', () => {
         const index = source.getAttribute('data-row-source');
-        page.querySelector(`[data-row-description="${index}"]`).textContent = sourceDescriptions[source.value];
+        page.querySelector('[data-row-description="' + index + '"]').textContent = sourceDescriptions[source.value];
       });
     });
     const loadSettings = async () => {
@@ -168,9 +168,9 @@
         const c = {
           Enabled:page.querySelector('#SpotlightEnabled').checked,
           Rows:defaults.map((fallback,index) => ({
-            Enabled:page.querySelector(`[data-row-enabled="${index}"]`).checked,
-            Source:page.querySelector(`[data-row-source="${index}"]`).value,
-            Title:page.querySelector(`[data-row-title="${index}"]`).value.trim() || fallback.Title
+            Enabled:page.querySelector('[data-row-enabled="' + index + '"]').checked,
+            Source:page.querySelector('[data-row-source="' + index + '"]').value,
+            Title:page.querySelector('[data-row-title="' + index + '"]').value.trim() || fallback.Title
           })),
           Density:page.querySelector('#SpotlightDensity').value,
           Position:page.querySelector('#SpotlightPosition').value,
@@ -199,7 +199,12 @@
         console.error('JellySpotlight settings could not be saved.',error);
         const status = error?.status || error?.statusCode;
         const detail = error?.responseText || error?.statusText || error?.message;
-        Dashboard.alert(`JellySpotlight settings could not be saved${status ? ` (HTTP ${status})` : ''}.${detail ? ` ${detail}` : ''}`);
+        Dashboard.alert(
+          'JellySpotlight settings could not be saved'
+          + (status ? ' (HTTP ' + status + ')' : '')
+          + '.'
+          + (detail ? ' ' + detail : '')
+        );
       } finally {
         Dashboard.hideLoadingMsg();
       }
