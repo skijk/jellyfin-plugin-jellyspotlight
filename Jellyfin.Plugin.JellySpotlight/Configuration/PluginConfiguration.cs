@@ -6,7 +6,7 @@ public sealed class SpotlightRowConfiguration
 {
     public bool Enabled { get; set; } = true;
     public string Source { get; set; } = "hot";
-    public string Title { get; set; } = "What's hot right now";
+    public string Title { get; set; } = "Trending this week";
 }
 
 public sealed class PluginConfiguration : BasePluginConfiguration
@@ -19,7 +19,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
         new() { Enabled = false, Source = "recent", Title = "Recently added" }
     ];
     public string Source { get; set; } = "hot";
-    public string Title { get; set; } = "What's hot right now";
+    public string Title { get; set; } = "Trending this week";
     public string Density { get; set; } = "feature";
     public string Position { get; set; } = "afterBulletin";
     public int ItemCount { get; set; } = 8;

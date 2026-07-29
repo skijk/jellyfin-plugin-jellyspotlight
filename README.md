@@ -1,12 +1,12 @@
 # JellySpotlight
 
-A compact, configurable, multi-title spotlight shelf for Jellyfin Web.
+A configurable collection of wide, horizontally scrollable feature rows for Jellyfin Web.
 
 ## Sources
 
-- What's hot right now — reuses Jelana's hourly cached analytics.
-- New and popular — combines Jelana data with Jellyfin item metadata.
-- Recently added — uses Jellyfin's authenticated library API.
+- Trending this week — titles growing fastest during the last 7 days compared with the previous 7 days.
+- Popular new arrivals — recently added titles, with titles already being watched shown first.
+- Recently added — the latest movies and series added to the Jellyfin library.
 
 JellySpotlight never reads the Playback Reporting database. Analytics sources use the existing authenticated `/Jelana/Snapshot` cache endpoint.
 

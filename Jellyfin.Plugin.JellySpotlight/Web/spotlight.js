@@ -204,5 +204,7 @@
       }
     }
   }).observe(document.body,{childList:true,subtree:true});
-  window.addEventListener('hashchange',refresh); setInterval(refresh,60000); refresh();
+  window.addEventListener('hashchange',refresh);
+  window.addEventListener('jellyspotlight-refresh',refresh);
+  setInterval(refresh,60000); refresh();
 })();
