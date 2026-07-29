@@ -4,6 +4,16 @@
   let busy = false;
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
   const api = options => ApiClient.ajax(options);
+  function normalizeSettings(raw) {
+    return {
+      Enabled: pick(raw,'enabled') ?? true,
+      Source: pick(raw,'source') || 'hot',
+      Title: pick(raw,'title') || "What's hot right now",
+      Density: pick(raw,'density') || 'compact',
+      ItemCount: Number(pick(raw,'itemCount') || 8),
+      ShowMetrics: pick(raw,'showMetrics') ?? true
+    };
+  }
   function homeHost() {
     return document.querySelector('#indexPage:not(.hide) .homeSectionsContainer,#indexPage:not(.hide) .sections,#indexPage:not(.hide) .content-primary,.homePage:not(.hide) .homeSectionsContainer,.homePage:not(.hide) .sections,.homePage:not(.hide) .content-primary');
   }
@@ -56,7 +66,9 @@
   }
   async function refresh() {
     if (busy || !homeHost()) return; busy=true;
-    try { const settings=await api({type:'GET',url:ApiClient.getUrl('JellySpotlight/Settings')}); if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; } render(settings,await load(settings)); }
+    try { const settings=normalizeSettings(await api({type:'GET',url:ApiClient.getUrl('JellySpotlight/Settings')}));
+      if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; }
+      render(settings,await load(settings)); }
     catch (error) { console.warn('JellySpotlight could not load its content.',error); }
     finally { busy=false; }
   }
