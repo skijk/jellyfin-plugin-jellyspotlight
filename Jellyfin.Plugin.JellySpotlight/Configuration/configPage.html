@@ -8,7 +8,59 @@
         <input id="SpotlightEnabled" type="checkbox" is="emby-checkbox"><span>Show JellySpotlight</span>
       </label></div>
       <h2>Rows</h2>
-      <div id="SpotlightRows"></div>
+      <div id="SpotlightRows">
+        <div class="verticalSection" data-row="0" style="padding:1rem;margin:0 0 1rem;border:1px solid rgba(255,255,255,.15);border-radius:.5rem">
+          <h3 style="margin-top:0">Spotlight row 1</h3>
+          <div class="checkboxContainer"><label class="emby-checkbox-label">
+            <input data-row-enabled="0" type="checkbox" is="emby-checkbox"><span>Show this row</span>
+          </label></div>
+          <div class="inputContainer"><label class="inputLabel">Row title</label>
+            <input data-row-title="0" is="emby-input" maxlength="80">
+          </div>
+          <div class="selectContainer"><label class="selectLabel">Content source</label>
+            <select data-row-source="0" is="emby-select" class="emby-select-withcolor emby-select">
+              <option value="hot">Trending this week</option>
+              <option value="newPopular">Popular new arrivals</option>
+              <option value="recent">Recently added</option>
+            </select>
+            <div class="fieldDescription" data-row-description="0"></div>
+          </div>
+        </div>
+        <div class="verticalSection" data-row="1" style="padding:1rem;margin:0 0 1rem;border:1px solid rgba(255,255,255,.15);border-radius:.5rem">
+          <h3 style="margin-top:0">Spotlight row 2</h3>
+          <div class="checkboxContainer"><label class="emby-checkbox-label">
+            <input data-row-enabled="1" type="checkbox" is="emby-checkbox"><span>Show this row</span>
+          </label></div>
+          <div class="inputContainer"><label class="inputLabel">Row title</label>
+            <input data-row-title="1" is="emby-input" maxlength="80">
+          </div>
+          <div class="selectContainer"><label class="selectLabel">Content source</label>
+            <select data-row-source="1" is="emby-select" class="emby-select-withcolor emby-select">
+              <option value="hot">Trending this week</option>
+              <option value="newPopular">Popular new arrivals</option>
+              <option value="recent">Recently added</option>
+            </select>
+            <div class="fieldDescription" data-row-description="1"></div>
+          </div>
+        </div>
+        <div class="verticalSection" data-row="2" style="padding:1rem;margin:0 0 1rem;border:1px solid rgba(255,255,255,.15);border-radius:.5rem">
+          <h3 style="margin-top:0">Spotlight row 3</h3>
+          <div class="checkboxContainer"><label class="emby-checkbox-label">
+            <input data-row-enabled="2" type="checkbox" is="emby-checkbox"><span>Show this row</span>
+          </label></div>
+          <div class="inputContainer"><label class="inputLabel">Row title</label>
+            <input data-row-title="2" is="emby-input" maxlength="80">
+          </div>
+          <div class="selectContainer"><label class="selectLabel">Content source</label>
+            <select data-row-source="2" is="emby-select" class="emby-select-withcolor emby-select">
+              <option value="hot">Trending this week</option>
+              <option value="newPopular">Popular new arrivals</option>
+              <option value="recent">Recently added</option>
+            </select>
+            <div class="fieldDescription" data-row-description="2"></div>
+          </div>
+        </div>
+      </div>
       <div class="fieldDescription">Jelana sources reuse its hourly cached analytics and never query Playback Reporting live.</div>
       <div class="selectContainer"><label class="selectLabel" for="SpotlightDensity">Card size</label>
         <select id="SpotlightDensity" is="emby-select" class="emby-select-withcolor emby-select">
@@ -47,57 +99,42 @@
       {Enabled:true,Source:'newPopular',Title:'Popular new arrivals'},
       {Enabled:false,Source:'recent',Title:'Recently added'}
     ];
-    const sourceOptions = [
-      ['hot','Trending this week'],
-      ['newPopular','Popular new arrivals'],
-      ['recent','Recently added']
-    ];
     const sourceDescriptions = {
       hot:'Growing fastest during the last 7 days compared with the previous 7 days. Cached by Jelana.',
       newPopular:'Recently added movies and series, with titles already being watched shown first. Cached by Jelana.',
       recent:'The latest movies and series added to the Jellyfin library.'
     };
     const renderRows = rows => {
-      const host = page.querySelector('#SpotlightRows');
-      host.replaceChildren(...defaults.map((fallback,index) => {
+      defaults.forEach((fallback,index) => {
         const row = rows[index] || fallback;
-        const box = document.createElement('div');
-        box.className = 'verticalSection';
-        box.style.cssText = 'padding:1rem;margin:0 0 1rem;border:1px solid rgba(255,255,255,.15);border-radius:.5rem';
-        box.innerHTML = `<h3 style="margin-top:0">Spotlight row ${index + 1}</h3>
-        <div class="checkboxContainer"><label class="emby-checkbox-label">
-          <input data-row-enabled="${index}" type="checkbox" is="emby-checkbox"><span>Show this row</span>
-        </label></div>
-        <div class="inputContainer"><label class="inputLabel">Row title</label>
-          <input data-row-title="${index}" is="emby-input" maxlength="80">
-        </div>
-        <div class="selectContainer"><label class="selectLabel">Content source</label>
-          <select data-row-source="${index}" is="emby-select" class="emby-select-withcolor emby-select">
-            ${sourceOptions.map(([value,label]) => `<option value="${value}">${label}</option>`).join('')}
-          </select>
-          <div class="fieldDescription" data-row-description="${index}"></div>
-        </div>`;
-        box.querySelector(`[data-row-enabled="${index}"]`).checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
+        page.querySelector(`[data-row-enabled="${index}"]`).checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
         const storedTitle = row.Title || row.title || fallback.Title;
-        box.querySelector(`[data-row-title="${index}"]`).value =
+        page.querySelector(`[data-row-title="${index}"]`).value =
           storedTitle === "What's hot right now" ? 'Trending this week'
           : storedTitle === 'New and popular' ? 'Popular new arrivals'
           : storedTitle;
-        const source = box.querySelector(`[data-row-source="${index}"]`);
-        const description = box.querySelector(`[data-row-description="${index}"]`);
+        const source = page.querySelector(`[data-row-source="${index}"]`);
+        const description = page.querySelector(`[data-row-description="${index}"]`);
         source.value = row.Source || row.source || fallback.Source;
-        const updateDescription = () => { description.textContent = sourceDescriptions[source.value]; };
-        source.addEventListener('change', updateDescription);
-        updateDescription();
-        return box;
-      }));
+        description.textContent = sourceDescriptions[source.value];
+      });
     };
+    page.querySelectorAll('[data-row-source]').forEach(source => {
+      source.addEventListener('change', () => {
+        const index = source.getAttribute('data-row-source');
+        page.querySelector(`[data-row-description="${index}"]`).textContent = sourceDescriptions[source.value];
+      });
+    });
     const loadSettings = async () => {
       if (loading) return;
       loading = true;
       Dashboard.showLoadingMsg();
       try {
-        const c = await ApiClient.getPluginConfiguration(id);
+        const c = await ApiClient.ajax({
+          type:'GET',
+          url:ApiClient.getUrl('JellySpotlight/Settings',{refresh:Date.now()}),
+          dataType:'json'
+        });
         const rows = value(c,'Rows','rows');
         page.querySelector('#SpotlightEnabled').checked = value(c,'Enabled','enabled') ?? true;
         renderRows(rows?.length ? rows : [{
@@ -128,20 +165,36 @@
       }
       Dashboard.showLoadingMsg();
       try {
-        const c = await ApiClient.getPluginConfiguration(id);
-        c.Enabled = page.querySelector('#SpotlightEnabled').checked;
-        c.Rows = defaults.map((fallback,index) => ({
-          Enabled:page.querySelector(`[data-row-enabled="${index}"]`).checked,
-          Source:page.querySelector(`[data-row-source="${index}"]`).value,
-          Title:page.querySelector(`[data-row-title="${index}"]`).value.trim() || fallback.Title
-        }));
-        c.Density = page.querySelector('#SpotlightDensity').value;
-        c.Position = page.querySelector('#SpotlightPosition').value;
-        c.ItemCount = Number(page.querySelector('#SpotlightCount').value);
-        c.ShowMetrics = page.querySelector('#SpotlightMetrics').checked;
-        const result = await ApiClient.updatePluginConfiguration(id, c);
+        const c = {
+          Enabled:page.querySelector('#SpotlightEnabled').checked,
+          Rows:defaults.map((fallback,index) => ({
+            Enabled:page.querySelector(`[data-row-enabled="${index}"]`).checked,
+            Source:page.querySelector(`[data-row-source="${index}"]`).value,
+            Title:page.querySelector(`[data-row-title="${index}"]`).value.trim() || fallback.Title
+          })),
+          Density:page.querySelector('#SpotlightDensity').value,
+          Position:page.querySelector('#SpotlightPosition').value,
+          ItemCount:Number(page.querySelector('#SpotlightCount').value),
+          ShowMetrics:page.querySelector('#SpotlightMetrics').checked
+        };
+        await ApiClient.ajax({
+          type:'PUT',
+          url:ApiClient.getUrl('JellySpotlight/Settings'),
+          contentType:'application/json',
+          data:JSON.stringify(c)
+        });
+        const verification = await ApiClient.ajax({
+          type:'GET',
+          url:ApiClient.getUrl('JellySpotlight/Settings',{verify:Date.now()}),
+          dataType:'json'
+        });
+        if ((value(verification,'Density','density') || '') !== c.Density
+          || Boolean(value(verification,'Enabled','enabled')) !== c.Enabled
+          || Number(value(verification,'ItemCount','itemCount')) !== c.ItemCount) {
+          throw new Error('The server did not return the saved Spotlight settings.');
+        }
         window.dispatchEvent(new CustomEvent('jellyspotlight-refresh'));
-        Dashboard.processPluginConfigurationUpdateResult(result || {});
+        Dashboard.processPluginConfigurationUpdateResult();
       } catch (error) {
         console.error('JellySpotlight settings could not be saved.',error);
         Dashboard.alert('JellySpotlight settings could not be saved. Check the browser console for details.');

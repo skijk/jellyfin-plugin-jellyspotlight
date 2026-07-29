@@ -12,6 +12,14 @@ public sealed class SpotlightController : ControllerBase
     [Authorize]
     public ActionResult<PluginConfiguration> Settings() => Ok(Plugin.Instance.Configuration);
 
+    [HttpPut("Settings")]
+    [Authorize(Policy = "RequiresElevation")]
+    public IActionResult SaveSettings([FromBody] PluginConfiguration configuration)
+    {
+        Plugin.Instance.UpdateConfiguration(configuration);
+        return NoContent();
+    }
+
     [HttpGet("Client.js")]
     [AllowAnonymous]
     public IActionResult Script() => Embedded("Web.spotlight.js", "text/javascript; charset=utf-8");
