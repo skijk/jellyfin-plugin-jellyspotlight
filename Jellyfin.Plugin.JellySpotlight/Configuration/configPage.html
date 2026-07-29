@@ -39,8 +39,8 @@
     const page = document.querySelector('#JellySpotlightConfigPage');
     const form = page.querySelector('#JellySpotlightForm');
     const defaults = [
-      {Enabled:true,Source:'hot',Title:"What's hot right now"},
-      {Enabled:true,Source:'newPopular',Title:'New and popular'},
+      {Enabled:true,Source:'hot',Title:'Trending this week'},
+      {Enabled:true,Source:'newPopular',Title:'Popular new arrivals'},
       {Enabled:false,Source:'recent',Title:'Recently added'}
     ];
     const sourceOptions = [
@@ -67,7 +67,11 @@
           </select>
         </div>`;
         box.querySelector(`[data-row-enabled="${index}"]`).checked = row.Enabled ?? row.enabled ?? fallback.Enabled;
-        box.querySelector(`[data-row-title="${index}"]`).value = row.Title || row.title || fallback.Title;
+        const storedTitle = row.Title || row.title || fallback.Title;
+        box.querySelector(`[data-row-title="${index}"]`).value =
+          storedTitle === "What's hot right now" ? 'Trending this week'
+          : storedTitle === 'New and popular' ? 'Popular new arrivals'
+          : storedTitle;
         box.querySelector(`[data-row-source="${index}"]`).value = row.Source || row.source || fallback.Source;
         return box;
       }));

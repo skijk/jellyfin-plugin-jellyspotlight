@@ -14,8 +14,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public bool Enabled { get; set; } = true;
     public List<SpotlightRowConfiguration> Rows { get; set; } =
     [
-        new() { Source = "hot", Title = "What's hot right now" },
-        new() { Source = "newPopular", Title = "New and popular" },
+        new() { Source = "hot", Title = "Trending this week" },
+        new() { Source = "newPopular", Title = "Popular new arrivals" },
         new() { Enabled = false, Source = "recent", Title = "Recently added" }
     ];
     public string Source { get; set; } = "hot";

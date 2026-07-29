@@ -5,6 +5,18 @@
   let lastSettings = null;
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
   const api = options => ApiClient.ajax({...options,dataType:'json'});
+  const migrateTitle = (title, source) => {
+    if (title === "What's hot right now") return 'Trending this week';
+    if (title === 'New and popular') return 'Popular new arrivals';
+    return title || (source === 'newPopular'
+      ? 'Popular new arrivals'
+      : source === 'recent' ? 'Recently added' : 'Trending this week');
+  };
+  const sourceDescription = source => source === 'newPopular'
+    ? 'Recently added and already being watched'
+    : source === 'recent'
+      ? 'Latest movies and series added to the library'
+      : 'Growing fastest compared with last week';
   function normalizeSettings(raw) {
     const configuredRows = pick(raw,'rows');
     const legacyRow = {
@@ -17,7 +29,7 @@
       Rows: (configuredRows?.length ? configuredRows : [legacyRow]).map(row => ({
         Enabled:pick(row,'enabled') ?? true,
         Source:pick(row,'source') || 'hot',
-        Title:pick(row,'title') || "What's hot right now"
+        Title:migrateTitle(pick(row,'title'),pick(row,'source') || 'hot')
       })),
       Density: pick(raw,'density') || 'feature',
       Position: pick(raw,'position') || 'afterBulletin',
@@ -80,8 +92,8 @@
   function renderRow(settings, rowSettings, entries) {
     const section=document.createElement('section'); section.className='jellyspotlight-row';
     const heading=document.createElement('div'); heading.className='jellyspotlight-heading';
-    const title=document.createElement('h2'); title.textContent=rowSettings.Title || "What's hot right now";
-    const scope=document.createElement('small'); scope.textContent=rowSettings.Source === 'recent' ? 'Recently added' : 'Server-wide · cached by Jelana';
+    const title=document.createElement('h2'); title.textContent=rowSettings.Title || 'Trending this week';
+    const scope=document.createElement('small'); scope.textContent=sourceDescription(rowSettings.Source);
     heading.append(title,scope); const track=document.createElement('div'); track.className='jellyspotlight-track';
     isolateShelfGestures(track);
     entries.forEach(({row,item}) => {
