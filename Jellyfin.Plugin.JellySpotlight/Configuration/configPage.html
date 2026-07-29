@@ -15,6 +15,13 @@
           <option value="feature">Feature</option><option value="cinematic">Cinematic</option>
         </select>
       </div>
+      <div class="selectContainer"><label class="selectLabel" for="SpotlightPosition">Home screen position</label>
+        <select id="SpotlightPosition" is="emby-select" class="emby-select-withcolor emby-select">
+          <option value="afterBulletin">After JellyBulletin</option>
+          <option value="beforeBulletin">Before JellyBulletin</option>
+        </select>
+        <div class="fieldDescription">If JellyBulletin is installed, JellySpotlight keeps this order even when the plugins load at different times.</div>
+      </div>
       <div class="selectContainer"><label class="selectLabel" for="SpotlightCount">Titles to load</label>
         <select id="SpotlightCount" is="emby-select" class="emby-select-withcolor emby-select">
           <option>6</option><option selected>8</option><option>10</option><option>12</option><option>16</option>
@@ -71,6 +78,7 @@
       page.querySelector('#SpotlightEnabled').checked = c.Enabled ?? true;
       renderRows(c.Rows?.length ? c.Rows : [{Enabled:true,Source:c.Source || 'hot',Title:c.Title || "What's hot right now"}]);
       page.querySelector('#SpotlightDensity').value = c.Density || 'feature';
+      page.querySelector('#SpotlightPosition').value = c.Position || 'afterBulletin';
       page.querySelector('#SpotlightCount').value = String(c.ItemCount || 8);
       page.querySelector('#SpotlightMetrics').checked = c.ShowMetrics ?? true;
       Dashboard.hideLoadingMsg();
@@ -85,6 +93,7 @@
         Title:page.querySelector(`[data-row-title="${index}"]`).value.trim() || fallback.Title
       }));
       c.Density = page.querySelector('#SpotlightDensity').value;
+      c.Position = page.querySelector('#SpotlightPosition').value;
       c.ItemCount = Number(page.querySelector('#SpotlightCount').value);
       c.ShowMetrics = page.querySelector('#SpotlightMetrics').checked;
       await ApiClient.updatePluginConfiguration(id, c);

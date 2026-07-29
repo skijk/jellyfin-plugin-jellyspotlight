@@ -21,6 +21,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public string Source { get; set; } = "hot";
     public string Title { get; set; } = "What's hot right now";
     public string Density { get; set; } = "feature";
+    public string Position { get; set; } = "afterBulletin";
     public int ItemCount { get; set; } = 8;
     public bool ShowMetrics { get; set; } = true;
 }

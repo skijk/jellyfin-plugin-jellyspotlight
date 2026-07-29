@@ -2,6 +2,7 @@
   'use strict';
   const ROOT_ID = 'jellySpotlight';
   let busy = false;
+  let lastSettings = null;
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
   const api = options => ApiClient.ajax({...options,dataType:'json'});
   function normalizeSettings(raw) {
@@ -19,6 +20,7 @@
         Title:pick(row,'title') || "What's hot right now"
       })),
       Density: pick(raw,'density') || 'feature',
+      Position: pick(raw,'position') || 'afterBulletin',
       ItemCount: Number(pick(raw,'itemCount') || 8),
       ShowMetrics: pick(raw,'showMetrics') ?? true
     };
@@ -32,14 +34,14 @@
       UserId:ApiClient.getCurrentUserId(),
       Ids:ids.join(','),
       Recursive:true,
-      Fields:'Overview,PrimaryImageAspectRatio,BackdropImageTags,ImageTags'
+      Fields:'Overview,PrimaryImageAspectRatio,BackdropImageTags,ImageTags,CriticRating,CommunityRating'
     })});
     return pick(result,'items') || [];
   }
   async function load(rowSettings, settings, snapshotPromise) {
     if (rowSettings.Source === 'recent') {
       const userId = ApiClient.getCurrentUserId();
-      const result = await api({type:'GET',url:ApiClient.getUrl('Items',{UserId:userId,SortBy:'DateCreated',SortOrder:'Descending',IncludeItemTypes:'Movie,Series',Recursive:true,Limit:settings.ItemCount,Fields:'BackdropImageTags,ImageTags'})});
+      const result = await api({type:'GET',url:ApiClient.getUrl('Items',{UserId:userId,SortBy:'DateCreated',SortOrder:'Descending',IncludeItemTypes:'Movie,Series',Recursive:true,Limit:settings.ItemCount,Fields:'BackdropImageTags,ImageTags,CriticRating,CommunityRating'})});
       return (pick(result,'items') || []).map(item => ({item}));
     }
     const snapshot = await snapshotPromise;
@@ -86,7 +88,16 @@
       const image=document.createElement('img'); image.loading='lazy'; image.alt=''; image.src=imageUrl(item);
       const copy=document.createElement('div'); copy.className='jellyspotlight-copy'; const name=document.createElement('strong'); name.textContent=item.Name||item.name;
       copy.append(name);
-      if (settings.ShowMetrics && row) { const meta=document.createElement('span'); const plays=pick(row,'currentPlays') ?? pick(row,'plays'); const viewers=pick(row,'uniqueViewers'); meta.textContent=`${plays} plays${viewers == null ? '' : ` · ${viewers} viewers`}`; copy.append(meta); }
+      if (settings.ShowMetrics) {
+        const values=[];
+        const plays=row && (pick(row,'currentPlays') ?? pick(row,'plays'));
+        const viewers=row && pick(row,'uniqueViewers');
+        const critic=pick(item,'criticRating');
+        if (Number.isFinite(Number(plays))) values.push(`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`);
+        if (Number.isFinite(Number(viewers))) values.push(`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`);
+        if (Number.isFinite(Number(critic))) values.push(`🍅 ${Math.round(Number(critic))}%`);
+        if (values.length) { const meta=document.createElement('span'); meta.textContent=values.join(' · '); copy.append(meta); }
+      }
       card.append(image,copy); track.append(card);
     });
     if (!entries.length) {
@@ -100,11 +111,22 @@
     document.getElementById(ROOT_ID)?.remove();
     const root = document.createElement('div'); root.id=ROOT_ID; root.className=`jellyspotlight-${settings.Density || 'feature'}`;
     rowResults.forEach(({row,entries}) => root.append(renderRow(settings,row,entries)));
-    host.prepend(root);
+    placeRoot(root,settings.Position);
+  }
+  function placeRoot(root, position) {
+    const host=homeHost(); if (!host || !root) return;
+    const bulletin=document.getElementById('jellyfinBulletin');
+    if (!bulletin || bulletin.parentElement !== host) {
+      host.prepend(root);
+      return;
+    }
+    if (position === 'beforeBulletin') host.insertBefore(root,bulletin);
+    else bulletin.insertAdjacentElement('afterend',root);
   }
   async function refresh() {
     if (busy || !homeHost()) return; busy=true;
     try { const settings=normalizeSettings(await api({type:'GET',url:ApiClient.getUrl('JellySpotlight/Settings')}));
+      lastSettings=settings;
       if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; }
       const rows=settings.Rows.filter(row => row.Enabled);
       const needsJelana=rows.some(row => row.Source !== 'recent');
@@ -117,7 +139,17 @@
     finally { busy=false; }
   }
   new MutationObserver(() => {
-    if (!document.getElementById(ROOT_ID)) refresh();
+    const root=document.getElementById(ROOT_ID);
+    if (!root) refresh();
+    else {
+      const bulletin=document.getElementById('jellyfinBulletin');
+      if (bulletin && root.parentElement === bulletin.parentElement) {
+        const shouldFollow=lastSettings?.Position !== 'beforeBulletin';
+        const follows=bulletin.nextElementSibling === root;
+        const precedes=root.nextElementSibling === bulletin;
+        if ((shouldFollow && !follows) || (!shouldFollow && !precedes)) placeRoot(root,lastSettings?.Position);
+      }
+    }
   }).observe(document.body,{childList:true,subtree:true});
   window.addEventListener('hashchange',refresh); setInterval(refresh,60000); refresh();
 })();
