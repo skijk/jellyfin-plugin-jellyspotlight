@@ -197,7 +197,9 @@
         Dashboard.processPluginConfigurationUpdateResult();
       } catch (error) {
         console.error('JellySpotlight settings could not be saved.',error);
-        Dashboard.alert('JellySpotlight settings could not be saved. Check the browser console for details.');
+        const status = error?.status || error?.statusCode;
+        const detail = error?.responseText || error?.statusText || error?.message;
+        Dashboard.alert(`JellySpotlight settings could not be saved${status ? ` (HTTP ${status})` : ''}.${detail ? ` ${detail}` : ''}`);
       } finally {
         Dashboard.hideLoadingMsg();
       }
