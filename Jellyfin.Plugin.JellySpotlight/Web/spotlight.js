@@ -225,7 +225,14 @@
       const snapshotPromise=needsJelana
         ? api({type:'GET',url:ApiClient.getUrl('Jelana/Snapshot')})
         : Promise.resolve({});
-      const rowResults=await Promise.all(rows.map(async row => ({row,entries:await load(row,settings,snapshotPromise)})));
+      const rowResults=(await Promise.all(rows.map(async row => {
+        try {
+          return {row,entries:await load(row,settings,snapshotPromise)};
+        } catch (error) {
+          console.warn('JellySpotlight could not load row "' + row.Title + '".',error);
+          return {row,entries:[]};
+        }
+      }))).filter(result => result.entries.length);
       render(settings,rowResults); }
     catch (error) { console.warn('JellySpotlight could not load its content.',error); }
     finally { busy=false; }
