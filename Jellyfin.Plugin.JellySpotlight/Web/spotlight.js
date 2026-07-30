@@ -26,9 +26,14 @@
       Source:pick(raw,'source') || 'hot',
       Title:pick(raw,'title') || "What's hot right now"
     };
+    const defaultRows = [
+      legacyRow,
+      {Enabled:true,Source:'newPopular',Title:'Popular new arrivals'},
+      {Enabled:false,Source:'recent',Title:'Recently added'}
+    ];
     return {
       Enabled: pick(raw,'enabled') ?? true,
-      Rows: (configuredRows?.length ? configuredRows : [legacyRow]).map(row => ({
+      Rows: (configuredRows?.length ? configuredRows : defaultRows).slice(0,3).map(row => ({
         Enabled:pick(row,'enabled') ?? true,
         Source:pick(row,'source') || 'hot',
         Title:migrateTitle(pick(row,'title'),pick(row,'source') || 'hot')

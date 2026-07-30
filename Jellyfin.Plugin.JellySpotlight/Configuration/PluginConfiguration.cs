@@ -12,12 +12,9 @@ public sealed class SpotlightRowConfiguration
 public sealed class PluginConfiguration : BasePluginConfiguration
 {
     public bool Enabled { get; set; } = true;
-    public List<SpotlightRowConfiguration> Rows { get; set; } =
-    [
-        new() { Source = "hot", Title = "Trending this week" },
-        new() { Source = "newPopular", Title = "Popular new arrivals" },
-        new() { Enabled = false, Source = "recent", Title = "Recently added" }
-    ];
+    // Keep this collection empty before XML deserialization. XmlSerializer populates
+    // existing collections, so prefilled defaults would be duplicated after restart.
+    public List<SpotlightRowConfiguration> Rows { get; set; } = [];
     public string Source { get; set; } = "hot";
     public string Title { get; set; } = "Trending this week";
     public string Density { get; set; } = "feature";
