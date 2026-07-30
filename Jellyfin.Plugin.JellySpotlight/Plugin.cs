@@ -12,7 +12,7 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public Plugin(IApplicationPaths paths, IXmlSerializer serializer) : base(paths, serializer) => Instance = this;
     public static Plugin Instance { get; private set; } = null!;
     public override string Name => "JellySpotlight";
-    public override string Description => "A compact, configurable multi-title spotlight shelf for Jellyfin.";
+    public override string Description => "Feature rows for Jellyfin Web. Requires File Transformation and Jelana; Radarr Watch is optional for Coming soon.";
     public override Guid Id => Guid.Parse("f41f333d-4be5-41df-9b23-d6b5c768ac63");
 
     public IEnumerable<PluginPageInfo> GetPages() =>
