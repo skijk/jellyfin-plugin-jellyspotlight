@@ -63,7 +63,7 @@
         type:'GET',
         url:ApiClient.getUrl('RadarrWatch/Upcoming',{limit:8})
       });
-      return (movies || []).map(movie => {
+      return (movies || []).filter(movie => pick(movie,'digitalRelease')).map(movie => {
         const tmdbId = pick(movie,'tmdbId');
         return {
           item:{
@@ -145,11 +145,6 @@
           }).format(date);
           copy.append(release);
         }
-      } else if (rowSettings.Source === 'upcoming') {
-        const release=document.createElement('span');
-        release.className='jellyspotlight-meta jellyspotlight-release';
-        release.textContent='Digital release TBA';
-        copy.append(release);
       }
       if (settings.ShowMetrics) {
         const values=[];
