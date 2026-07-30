@@ -18,7 +18,7 @@
       ? 'Latest movies and series added to the library'
       : source === 'upcoming'
         ? 'Monitored movies approaching digital release'
-      : 'Growing fastest compared with last week';
+      : 'Ranked by viewers, active days and growth; episode binges are capped';
   function normalizeSettings(raw) {
     const configuredRows = pick(raw,'rows');
     const legacyRow = {
@@ -150,10 +150,15 @@
         const values=[];
         const plays=row && (pick(row,'currentPlays') ?? pick(row,'plays'));
         const viewers=row && pick(row,'uniqueViewers');
+        const activeDays=row && pick(row,'activeDays');
         const community=pick(item,'communityRating');
         const critic=pick(item,'criticRating');
-        if (Number.isFinite(Number(plays))) values.push({text:`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`,className:'jellyspotlight-activity'});
         if (Number.isFinite(Number(viewers))) values.push({text:`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`,className:'jellyspotlight-activity'});
+        if (rowSettings.Source === 'hot' && Number.isFinite(Number(activeDays))) {
+          values.push({text:`${activeDays} active ${Number(activeDays) === 1 ? 'day' : 'days'}`,className:'jellyspotlight-activity'});
+        } else if (Number.isFinite(Number(plays))) {
+          values.push({text:`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`,className:'jellyspotlight-activity'});
+        }
         if (Number.isFinite(Number(community))) values.push({text:`★ ${Number(community).toFixed(1)}`,className:'jellyspotlight-rating'});
         if (Number.isFinite(Number(critic))) values.push({text:`🍅 ${Math.round(Number(critic))}%`,className:'jellyspotlight-critic'});
         if (values.length) {
