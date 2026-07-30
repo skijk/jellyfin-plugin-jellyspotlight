@@ -16,6 +16,8 @@
     ? 'Recently added and already being watched'
     : source === 'recent'
       ? 'Latest movies and series added to the library'
+      : source === 'upcoming'
+        ? 'Monitored movies approaching digital release'
       : 'Growing fastest compared with last week';
   function normalizeSettings(raw) {
     const configuredRows = pick(raw,'rows');
@@ -51,6 +53,25 @@
     return pick(result,'items') || [];
   }
   async function load(rowSettings, settings, snapshotPromise) {
+    if (rowSettings.Source === 'upcoming') {
+      const movies = await api({
+        type:'GET',
+        url:ApiClient.getUrl('RadarrWatch/Upcoming',{limit:settings.ItemCount})
+      });
+      return (movies || []).map(movie => {
+        const tmdbId = pick(movie,'tmdbId');
+        return {
+          item:{
+            Id:'tmdb-' + tmdbId,
+            Name:pick(movie,'title'),
+            ProductionYear:pick(movie,'year'),
+            SpotlightImageUrl:pick(movie,'imageUrl'),
+            SpotlightUrl:'https://www.themoviedb.org/movie/' + tmdbId,
+            DigitalRelease:pick(movie,'digitalRelease')
+          }
+        };
+      });
+    }
     if (rowSettings.Source === 'recent') {
       const userId = ApiClient.getCurrentUserId();
       const result = await api({type:'GET',url:ApiClient.getUrl('Items',{UserId:userId,SortBy:'DateCreated',SortOrder:'Descending',IncludeItemTypes:'Movie,Series',Recursive:true,Limit:settings.ItemCount,Fields:'BackdropImageTags,ImageTags,CriticRating,CommunityRating'})});
@@ -84,6 +105,9 @@
     }).filter(entry => entry.item.Id);
   }
   function imageUrl(item) {
+    if (item.SpotlightImageUrl || item.spotlightImageUrl) {
+      return ApiClient.getUrl((item.SpotlightImageUrl || item.spotlightImageUrl).replace(/^\//,''));
+    }
     const id = item.Id || item.id;
     const backdrop = (item.BackdropImageTags || item.backdropImageTags || [])[0];
     return backdrop ? ApiClient.getUrl(`Items/${id}/Images/Backdrop/0`,{maxWidth:720,quality:82})
@@ -97,10 +121,25 @@
     heading.append(title,scope); const track=document.createElement('div'); track.className='jellyspotlight-track';
     isolateShelfGestures(track);
     entries.forEach(({row,item}) => {
-      const id=item.Id||item.id; const card=document.createElement('a'); card.className='jellyspotlight-card'; card.href=`#!/details?id=${encodeURIComponent(id)}`;
+      const id=item.Id||item.id; const card=document.createElement('a'); card.className='jellyspotlight-card';
+      card.href=item.SpotlightUrl||item.spotlightUrl||`#!/details?id=${encodeURIComponent(id)}`;
       const image=document.createElement('img'); image.loading='lazy'; image.alt=''; image.src=imageUrl(item);
       const copy=document.createElement('div'); copy.className='jellyspotlight-copy'; const name=document.createElement('strong'); name.textContent=item.Name||item.name;
       copy.append(name);
+      const digitalRelease=pick(item,'digitalRelease');
+      if (digitalRelease) {
+        const date=new Date(digitalRelease);
+        if (!Number.isNaN(date.getTime())) {
+          const release=document.createElement('span');
+          release.className='jellyspotlight-meta jellyspotlight-release';
+          release.textContent='Around ' + new Intl.DateTimeFormat('en-GB',{
+            day:'numeric',
+            month:'long',
+            year:date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+          }).format(date);
+          copy.append(release);
+        }
+      }
       if (settings.ShowMetrics) {
         const values=[];
         const plays=row && (pick(row,'currentPlays') ?? pick(row,'plays'));
@@ -182,7 +221,7 @@
       lastSettings=settings;
       if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; }
       const rows=settings.Rows.filter(row => row.Enabled);
-      const needsJelana=rows.some(row => row.Source !== 'recent');
+      const needsJelana=rows.some(row => row.Source === 'hot' || row.Source === 'newPopular');
       const snapshotPromise=needsJelana
         ? api({type:'GET',url:ApiClient.getUrl('Jelana/Snapshot')})
         : Promise.resolve({});

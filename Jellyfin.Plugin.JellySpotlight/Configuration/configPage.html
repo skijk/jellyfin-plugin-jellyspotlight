@@ -22,6 +22,7 @@
               <option value="hot">Trending this week</option>
               <option value="newPopular">Popular new arrivals</option>
               <option value="recent">Recently added</option>
+              <option value="upcoming">Coming soon</option>
             </select>
             <div class="fieldDescription" data-row-description="0"></div>
           </div>
@@ -39,6 +40,7 @@
               <option value="hot">Trending this week</option>
               <option value="newPopular">Popular new arrivals</option>
               <option value="recent">Recently added</option>
+              <option value="upcoming">Coming soon</option>
             </select>
             <div class="fieldDescription" data-row-description="1"></div>
           </div>
@@ -56,6 +58,7 @@
               <option value="hot">Trending this week</option>
               <option value="newPopular">Popular new arrivals</option>
               <option value="recent">Recently added</option>
+              <option value="upcoming">Coming soon</option>
             </select>
             <div class="fieldDescription" data-row-description="2"></div>
           </div>
@@ -102,7 +105,8 @@
     const sourceDescriptions = {
       hot:'Growing fastest during the last 7 days compared with the previous 7 days. Cached by Jelana.',
       newPopular:'Recently added movies and series, with titles already being watched shown first. Cached by Jelana.',
-      recent:'The latest movies and series added to the Jellyfin library.'
+      recent:'The latest movies and series added to the Jellyfin library.',
+      upcoming:'Monitored Radarr movies ordered by their upcoming digital release. Requires Radarr Watch.'
     };
     const renderRows = rows => {
       defaults.forEach((fallback,index) => {
