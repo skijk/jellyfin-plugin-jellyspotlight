@@ -20,6 +20,7 @@ public sealed class SpotlightController : ControllerBase
 {
     [HttpGet("Settings")]
     [Authorize]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public ActionResult<PluginConfiguration> Settings() => Ok(Plugin.Instance.Configuration);
 
     [HttpPut("Settings")]

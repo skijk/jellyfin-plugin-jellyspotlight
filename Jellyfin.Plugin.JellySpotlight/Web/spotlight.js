@@ -217,7 +217,11 @@
   }
   async function refresh() {
     if (busy || !homeHost()) return; busy=true;
-    try { const settings=normalizeSettings(await api({type:'GET',url:ApiClient.getUrl('JellySpotlight/Settings')}));
+    try { const settings=normalizeSettings(await api({
+      type:'GET',
+      url:ApiClient.getUrl('JellySpotlight/Settings',{refresh:Date.now()}),
+      cache:false
+    }));
       lastSettings=settings;
       if (!settings.Enabled) { document.getElementById(ROOT_ID)?.remove(); return; }
       const rows=settings.Rows.filter(row => row.Enabled);
