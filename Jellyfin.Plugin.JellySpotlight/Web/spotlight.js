@@ -61,7 +61,7 @@
     if (rowSettings.Source === 'upcoming') {
       const movies = await api({
         type:'GET',
-        url:ApiClient.getUrl('RadarrWatch/Upcoming',{limit:settings.ItemCount})
+        url:ApiClient.getUrl('RadarrWatch/Upcoming',{limit:8})
       });
       return (movies || []).map(movie => {
         const tmdbId = pick(movie,'tmdbId');
@@ -120,6 +120,7 @@
   }
   function renderRow(settings, rowSettings, entries) {
     const section=document.createElement('section'); section.className='jellyspotlight-row';
+    if (rowSettings.Source === 'upcoming') section.classList.add('jellyspotlight-row-upcoming');
     const heading=document.createElement('div'); heading.className='jellyspotlight-heading';
     const title=document.createElement('h2'); title.textContent=rowSettings.Title || 'Trending this week';
     const scope=document.createElement('small'); scope.textContent=sourceDescription(rowSettings.Source);
@@ -144,6 +145,11 @@
           }).format(date);
           copy.append(release);
         }
+      } else if (rowSettings.Source === 'upcoming') {
+        const release=document.createElement('span');
+        release.className='jellyspotlight-meta jellyspotlight-release';
+        release.textContent='Digital release TBA';
+        copy.append(release);
       }
       if (settings.ShowMetrics) {
         const values=[];
