@@ -10,7 +10,9 @@ A configurable collection of wide, horizontally scrollable feature rows for Jell
 - Popular new arrivals — recently added titles, with titles already being watched shown first.
 - Recently added — the latest movies and series added to the Jellyfin library.
 - Coming soon — monitored and unavailable Radarr movies with a confirmed future
-  digital release date. Unknown and theatrical-only dates are not shown.
+  digital release date, combined with monitored Sonarr seasons whose first
+  regular episode has a confirmed future air date. Specials and later episodes
+  are not shown.
 
 JellySpotlight never reads the Playback Reporting database. Analytics sources use the existing authenticated `/Jelana/Snapshot` cache endpoint.
 
@@ -22,12 +24,12 @@ JellySpotlight never reads the Playback Reporting database. Analytics sources us
 | [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) | Required | Injects Spotlight into Jellyfin Web |
 | [Jelana](https://github.com/skijk/jellyfin-plugin-jelana) | Required by the plugin catalog | Supplies the hourly cached Trending and Popular new arrivals data |
 | [Playback Reporting](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) | Transitive through Jelana | Playback history used when Jelana builds its cache |
-| [Radarr Watch](https://github.com/skijk/jellyfin-plugin-radarrwatch) | Optional | Supplies Coming soon titles, digital dates and artwork |
+| [Arr Watch](https://github.com/skijk/jellyfin-plugin-arrwatch) | Optional | Supplies Coming soon movies, season premieres, dates and artwork from Radarr and Sonarr |
 | [JellyBulletin](https://github.com/skijk/jellyfin-plugin-jellybulletin) | Optional | Spotlight can be positioned before or after Bulletin |
 
 JellySpotlight isolates row failures. If an optional source is unavailable,
-other configured rows continue to render. Coming soon is hidden when Radarr
-Watch is missing or has no confirmed future digital releases.
+other configured rows continue to render. Coming soon is hidden when Arr Watch
+is missing or has no confirmed future movie releases or season premieres.
 
 ## Installation
 
@@ -54,7 +56,7 @@ JellySpotlight:
    https://raw.githubusercontent.com/skijk/jellyfin-plugin-jellyspotlight-repository/main/manifest.json
    ```
 
-5. Optionally install Radarr Watch to enable Coming soon.
+5. Optionally install Arr Watch to enable Coming soon.
 6. Restart Jellyfin and configure the rows under **Dashboard → Plugins →
    JellySpotlight**.
 
@@ -62,8 +64,8 @@ JellySpotlight:
 
 Trending and Popular new arrivals reuse Jelana's atomically replaced hourly
 snapshot and never query Playback Reporting live. Recently added uses the
-authenticated Jellyfin library API. Coming soon uses Radarr Watch's server-side
-Radarr cache; the Radarr API key and internal address are never exposed to the
-browser.
+authenticated Jellyfin library API. Coming soon uses Arr Watch's independent
+server-side Radarr and Sonarr caches; API keys and internal addresses are never
+exposed to the browser.
 
 All user-facing text and source comments are English.

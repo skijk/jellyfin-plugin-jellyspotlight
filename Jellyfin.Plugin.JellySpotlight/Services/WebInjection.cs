@@ -18,8 +18,8 @@ public static partial class WebInjection
         }
 
         const string assets = """
-            <link data-jellyspotlight rel="stylesheet" href="/JellySpotlight/Client.css?v=0.3.7.0">
-            <script data-jellyspotlight defer src="/JellySpotlight/Client.js?v=0.3.7.0"></script>
+            <link data-jellyspotlight rel="stylesheet" href="/JellySpotlight/Client.css?v=0.3.8.0">
+            <script data-jellyspotlight defer src="/JellySpotlight/Client.js?v=0.3.8.0"></script>
             """;
         var bytes = Encoding.UTF8.GetBytes(HeadEndRegex().Replace(source, $"{assets}</head>", 1));
         stream.SetLength(0);

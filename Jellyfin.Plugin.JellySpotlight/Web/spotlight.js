@@ -17,7 +17,7 @@
     : source === 'recent'
       ? 'Latest movies and series added to the library'
       : source === 'upcoming'
-        ? 'Monitored movies approaching digital release'
+        ? 'Digital movie releases and new seasons approaching'
       : 'Ranked by viewers, active days and growth; episode binges are capped';
   function normalizeSettings(raw) {
     const configuredRows = pick(raw,'rows');
@@ -59,20 +59,29 @@
   }
   async function load(rowSettings, settings, snapshotPromise) {
     if (rowSettings.Source === 'upcoming') {
-      const movies = await api({
+      const upcoming = await api({
         type:'GET',
-        url:ApiClient.getUrl('RadarrWatch/Upcoming',{limit:8})
+        url:ApiClient.getUrl('ArrWatch/Upcoming',{limit:settings.ItemCount})
       });
-      return (movies || []).filter(movie => pick(movie,'digitalRelease')).map(movie => {
-        const tmdbId = pick(movie,'tmdbId');
+      return (upcoming || []).filter(entry => pick(entry,'releaseDate')).map(entry => {
+        const mediaType=pick(entry,'mediaType');
+        const source=pick(entry,'source');
+        const sourceId=pick(entry,'sourceId');
+        const tmdbId=pick(entry,'tmdbId');
+        const tvdbId=pick(entry,'tvdbId');
+        const seasonNumber=pick(entry,'seasonNumber');
         return {
           item:{
-            Id:'tmdb-' + tmdbId,
-            Name:pick(movie,'title'),
-            ProductionYear:pick(movie,'year'),
-            SpotlightImageUrl:pick(movie,'imageUrl'),
-            SpotlightUrl:'https://www.themoviedb.org/movie/' + tmdbId,
-            DigitalRelease:pick(movie,'digitalRelease')
+            Id:[source,sourceId,seasonNumber].filter(value => value !== null && value !== undefined).join('-'),
+            Name:pick(entry,'title'),
+            ProductionYear:pick(entry,'year'),
+            SpotlightImageUrl:pick(entry,'imageUrl'),
+            SpotlightUrl:mediaType === 'series' && tvdbId
+              ? 'https://thetvdb.com/dereferrer/series/' + tvdbId
+              : 'https://www.themoviedb.org/movie/' + tmdbId,
+            MediaType:mediaType,
+            SeasonNumber:seasonNumber,
+            ReleaseDate:pick(entry,'releaseDate')
           }
         };
       });
@@ -132,17 +141,21 @@
       const image=document.createElement('img'); image.loading='lazy'; image.alt=''; image.src=imageUrl(item);
       const copy=document.createElement('div'); copy.className='jellyspotlight-copy'; const name=document.createElement('strong'); name.textContent=item.Name||item.name;
       copy.append(name);
-      const digitalRelease=pick(item,'digitalRelease');
-      if (digitalRelease) {
-        const date=new Date(digitalRelease);
+      const releaseDate=pick(item,'releaseDate');
+      if (releaseDate) {
+        const date=new Date(releaseDate);
         if (!Number.isNaN(date.getTime())) {
           const release=document.createElement('span');
           release.className='jellyspotlight-meta jellyspotlight-release';
-          release.textContent='Around ' + new Intl.DateTimeFormat('en-GB',{
+          const formatted=new Intl.DateTimeFormat('en-GB',{
             day:'numeric',
             month:'long',
             year:date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
           }).format(date);
+          const seasonNumber=pick(item,'seasonNumber');
+          release.textContent=pick(item,'mediaType') === 'series'
+            ? `Season ${seasonNumber} · ${formatted}`
+            : 'Around ' + formatted;
           copy.append(release);
         }
       }
