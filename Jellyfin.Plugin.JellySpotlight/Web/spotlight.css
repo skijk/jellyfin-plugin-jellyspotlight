@@ -3,7 +3,7 @@
 .jellyspotlight-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin:0 var(--jellyspotlight-page-gap) .7rem}
 .jellyspotlight-heading h2{margin:0;font-size:1.45rem}
 .jellyspotlight-heading small{opacity:.6}
-.jellyspotlight-track{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(330px,29vw,490px);gap:1rem;overflow-x:auto;overscroll-behavior-inline:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity;margin-inline:var(--jellyspotlight-page-gap);padding:0 0 .65rem;scrollbar-width:thin}
+.jellyspotlight-track{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(330px,29vw,490px);gap:1rem;overflow-x:auto;overscroll-behavior-inline:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity;scroll-padding-inline-start:var(--jellyspotlight-page-gap);margin-left:var(--jellyspotlight-page-gap);padding:0 var(--jellyspotlight-page-gap) .65rem 0;scrollbar-width:thin}
 .jellyspotlight-cinematic .jellyspotlight-track{grid-auto-columns:clamp(410px,38vw,640px)}
 .jellyspotlight-card{position:relative;min-width:0;min-height:185px;aspect-ratio:2.15/1;border-radius:14px;overflow:hidden;background:#202020;color:#fff!important;text-decoration:none!important;scroll-snap-align:start;box-shadow:0 2px 12px rgba(0,0,0,.32)}
 .jellyspotlight-cinematic .jellyspotlight-card{min-height:220px}
