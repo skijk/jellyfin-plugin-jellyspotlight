@@ -2,6 +2,9 @@
 
 A configurable collection of wide, horizontally scrollable feature rows for Jellyfin Web.
 
+<img width="1700" height="569" alt="image" src="https://github.com/user-attachments/assets/009a7518-db63-491d-8f2a-ef88a083555e" />
+
+
 ## Sources
 
 - Trending this week — titles ranked primarily by unique viewers during the
