@@ -23,7 +23,7 @@ JellySpotlight never reads the Playback Reporting database. Analytics sources us
 
 | Component | Status | Used for |
 | --- | --- | --- |
-| Jellyfin Server 10.11.11 | Required | Supported server and plugin ABI |
+| Jellyfin Server 12.0 | Required | Supported server and plugin ABI |
 | [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) | Required | Injects Spotlight into Jellyfin Web |
 | [Jelana](https://github.com/skijk/jellyfin-plugin-jelana) | Required by the plugin catalog | Supplies the hourly cached Trending and Popular new arrivals data |
 | [Playback Reporting](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) | Transitive through Jelana | Playback history used when Jelana builds its cache |
