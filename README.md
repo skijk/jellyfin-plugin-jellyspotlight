@@ -2,6 +2,9 @@
 
 A configurable collection of wide, horizontally scrollable feature rows for Jellyfin Web.
 
+> Version 0.4.0.0 and later require Jellyfin 12.0 and File Transformation 3.0.
+> Jellyfin 10.11 installations must use the retained 0.3.x releases.
+
 <img width="1700" height="569" alt="image" src="https://github.com/user-attachments/assets/009a7518-db63-491d-8f2a-ef88a083555e" />
 
 
