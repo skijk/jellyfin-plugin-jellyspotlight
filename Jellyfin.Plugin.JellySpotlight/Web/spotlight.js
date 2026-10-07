@@ -4,6 +4,7 @@
   let busy = false;
   let lastSettings = null;
   const pick = (o, n) => o?.[n] ?? o?.[n[0].toUpperCase() + n.slice(1)];
+  const itemKey = value => String(value || '').toLowerCase();
   const api = options => ApiClient.ajax({...options,dataType:'json'});
   const migrateTitle = (title, source) => {
     if (title === "What's hot right now") return 'Trending this week';
@@ -106,17 +107,14 @@
     } catch (error) {
       console.warn('JellySpotlight could not enrich Jelana items with Jellyfin metadata.',error);
     }
-    const byId = new Map(enriched.map(item => [item.Id || item.id,item]));
+    const byId = new Map(enriched.map(item => [itemKey(item.Id || item.id),item]));
     return rows.map(row => {
       const id = pick(row,'id');
       return {
         row,
-        item:byId.get(id) || {
-          Id:id,
-          Name:pick(row,'name')
-        }
+        item:byId.get(itemKey(id))
       };
-    }).filter(entry => entry.item.Id);
+    }).filter(entry => entry.item);
   }
   function imageUrl(item) {
     if (item.SpotlightImageUrl || item.spotlightImageUrl) {
