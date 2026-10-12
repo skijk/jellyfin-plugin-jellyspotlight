@@ -10,9 +10,10 @@ A configurable collection of wide, horizontally scrollable feature rows for Jell
 
 ## Sources
 
-- Trending this week — titles ranked primarily by unique viewers during the
-  last 7 days. At least two viewers are required; active days and growth over
-  the previous week break ties, and episode binges are capped.
+- Trending this week — titles ranked by qualified unique viewers during the
+  last 7 days and viewer growth over the previous week. At least two viewers
+  are required, and each person counts once per title regardless of restarts,
+  repeat views or the number of series episodes watched.
 - Popular new arrivals — recently added titles, with titles already being watched shown first.
 - Recently added — the latest movies and series added to the Jellyfin library.
 - Coming soon — monitored and unavailable Radarr movies with a confirmed future

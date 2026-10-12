@@ -19,7 +19,7 @@
       ? 'Latest movies and series added to the library'
       : source === 'upcoming'
         ? 'Digital movie releases and new seasons approaching'
-      : 'Ranked by viewers, active days and growth; episode binges are capped';
+      : 'Qualified viewers and viewer growth; each person counts once per title';
   function normalizeSettings(raw) {
     const configuredRows = pick(raw,'rows');
     const legacyRow = {
@@ -161,13 +161,18 @@
         const values=[];
         const plays=row && (pick(row,'currentPlays') ?? pick(row,'plays'));
         const viewers=row && pick(row,'uniqueViewers');
-        const activeDays=row && pick(row,'activeDays');
+        const previousViewers=row && pick(row,'previousUniqueViewers');
         const community=pick(item,'communityRating');
         const critic=pick(item,'criticRating');
         if (Number.isFinite(Number(viewers))) values.push({text:`${viewers} ${Number(viewers) === 1 ? 'viewer' : 'viewers'}`,className:'jellyspotlight-activity'});
-        if (rowSettings.Source === 'hot' && Number.isFinite(Number(activeDays))) {
-          values.push({text:`${activeDays} active ${Number(activeDays) === 1 ? 'day' : 'days'}`,className:'jellyspotlight-activity'});
-        } else if (Number.isFinite(Number(plays))) {
+        if (rowSettings.Source === 'hot' && Number.isFinite(Number(previousViewers)) && Number.isFinite(Number(viewers))) {
+          const difference=Number(viewers)-Number(previousViewers);
+          const comparison=difference > 0 ? `↑ ${difference} vs last week`
+            : difference < 0 ? `↓ ${Math.abs(difference)} vs last week`
+            : '↔ no change vs last week';
+          values.push({text:comparison,className:'jellyspotlight-activity'});
+        } else if (Number.isFinite(Number(plays)) &&
+          (!Number.isFinite(Number(viewers)) || Number(plays) !== Number(viewers))) {
           values.push({text:`${plays} ${Number(plays) === 1 ? 'play' : 'plays'}`,className:'jellyspotlight-activity'});
         }
         if (Number.isFinite(Number(community))) values.push({text:`★ ${Number(community).toFixed(1)}`,className:'jellyspotlight-rating'});
